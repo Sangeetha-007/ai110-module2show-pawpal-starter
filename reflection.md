@@ -2,10 +2,11 @@
 
 ## 1. System Design
 
-**a. Initial design**
+Three core actions a user should be able to perform are adding a pet, tracking a feeding schedule and tracking daily grooming. If the pet is long haired, it may need grooming. If the pet is short haired, grooming daily may not be mandatory. 
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+
 
 **b. Design changes**
 
