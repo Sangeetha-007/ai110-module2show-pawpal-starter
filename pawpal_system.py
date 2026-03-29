@@ -19,17 +19,21 @@ class Pet:
     weight: float
     health_profile: HealthProfile = field(default_factory=HealthProfile)
 
-    # feed, groom, walk prints a confirmation using the pet's name. 
+    # feed, groom, walk prints a confirmation using the pet's name.
     def feed(self):
+        """Print a confirmation that this pet has been fed."""
         print(f"{self.name} has been fed.")
 
     def groom(self):
+        """Print a confirmation that this pet has been groomed."""
         print(f"{self.name} has been groomed.")
 
     def walk(self):
+        """Print a confirmation that this pet has been walked."""
         print(f"{self.name} has been walked.")
 
     def get_health_status(self) -> str:
+        """Return a readable summary of the pet's health info."""
         return f"{self.name} | Species: {self.species} | Age: {self.age} | Weight: {self.weight}kg | Notes: {self.health_profile.notes}"
 
 
@@ -45,9 +49,11 @@ class Task:
     duration_minutes: int = 0
 
     def mark_complete(self):
+        """Mark this task as completed."""
         self.is_completed = True
 
     def reschedule(self, new_date: datetime):
+        """Set a new due date and reset the task to incomplete."""
         self.due_date = new_date
         self.is_completed = False
 
@@ -60,10 +66,12 @@ class Owner:
         self.pets: List[Pet] = []
     #only adds in pet if its already not in the list
     def addPet(self, pet: Pet):
+        """Add a pet to this owner's list if not already present."""
         if pet not in self.pets:
             self.pets.append(pet)
 
     def removePet(self, pet: Pet):
+        """Remove a pet and delete all its associated tasks from the scheduler."""
         if pet in self.pets:
             self.pets.remove(pet)
             self.scheduler.all_tasks = [
@@ -72,6 +80,7 @@ class Owner:
             ]
 
     def get_schedule(self) -> List[Task]:
+        """Return all tasks in the scheduler that belong to this owner's pets."""
         return [task for task in self.scheduler.all_tasks
                 if task.linked_pet in self.pets]
 
@@ -87,16 +96,20 @@ class Scheduler:
         self.all_tasks: List[Task] = []
 
     def add_task(self, task: Task):
+        """Add a task to the scheduler and trigger recurring generation if needed."""
         self.all_tasks.append(task)
         if task.is_recurring:
             self.generate_recurring_tasks()
+
     # removes a task only if it exists in the list
     def remove_task(self, task: Task):
+        """Remove a task from the scheduler if it exists."""
         if task in self.all_tasks:
             self.all_tasks.remove(task)
 
     # triggers recurring generation first, then returns only incomplete tasks due today
     def get_todays_tasks(self) -> List[Task]:
+        """Return all incomplete tasks due today, generating recurring tasks first."""
         self.generate_recurring_tasks()
         today = datetime.now().date()
         return [task for task in self.all_tasks
@@ -104,6 +117,7 @@ class Scheduler:
 
     # sorts by "due_date", "title", or "duration"; returns unsorted list as fallback
     def get_sorted_tasks(self, sort_by: str) -> List[Task]:
+        """Return all tasks sorted by 'due_date', 'title', or 'duration'."""
         if sort_by == "due_date":
             return sorted(self.all_tasks, key=lambda t: t.due_date)
         elif sort_by == "title":
@@ -114,6 +128,7 @@ class Scheduler:
 
     # compares every pair of tasks; flags a conflict if their time windows overlap using due_date + duration_minutes
     def check_for_conflicts(self) -> List[Conflict]:
+        """Return pairs of tasks whose time windows overlap."""
         conflicts = []
         for i, task_a in enumerate(self.all_tasks):
             for task_b in self.all_tasks[i + 1:]:
@@ -124,6 +139,7 @@ class Scheduler:
         return conflicts
 
     def generate_recurring_tasks(self):
+        """Spawn the next occurrence of any overdue recurring tasks."""
         today = datetime.now().date()
         new_tasks = []
         for task in self.all_tasks:
