@@ -48,3 +48,14 @@ pip install -r requirements.txt
 2. warn_conflicts  
 3. filter_tasks
 4. sort_by_time
+
+### Testing PawPal+
+
+- To test PawPal+, run: python -m pytest
+
+-This pytest tests: 
+    - If tasks are returned in chronological order.
+    - Confirms that marking a daily task complete creates a new task for the following day.
+    - Verifies that the Scheduler flags duplicate times.
+
+Confidence Level of tests: 4/5

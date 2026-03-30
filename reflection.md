@@ -137,6 +137,19 @@ This means a task due tomorrow at 8am sorts before one due today at 8pm. This tr
 - What behaviors did you test?
 - Why were these tests important?
 
+When I asked Claude for suggestions for edge cases for testing, it listed a lot. One of the edge cases, Claude gave me:
+get_sorted_tasks
+
+Invalid sort key — currently returns unsorted all_tasks. Is that the intended behavior, or should it raise an error?
+Tasks with identical sort values — two tasks with the same due_date, title, or duration_minutes. Sort stability matters if you chain sorts.
+Empty scheduler — sort on zero tasks should return [], not crash.
+sort_by_time
+
+Tasks on different days at the same HH:MM — the sort groups them together since date is stripped. Is that correct?
+Tasks spanning midnight — e.g., duration pushes end time past 00:00.
+
+So, I wanted to keep it simple as possible. The edge cases I wanted to test for are a pet with no tasks, or two tasks at the exact same time. 
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
