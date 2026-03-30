@@ -7,6 +7,7 @@ Three core actions a user should be able to perform are adding a pet, tracking a
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+
 My UML diagram includes the classes: Owner, Pet, Task and Scheduler. The Owner class includes name and email as string. It holds a list of pets in case someone has multiple pets (it is of type Pet). It also includes an addPet and removePet in case a pet is added by mistake, etc. Also, has get_schedule which is of type "Task" for the owner. 
 
 The pet class includes a name, the species, age and weight. It includes a health profile to track the pet's wellness. Additionally, it has the feed, groom, walk and get_health_status methods. 
@@ -71,6 +72,7 @@ classDiagram
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
 A missing relationship Claude suggested for me is to give Pet a tasks list. It said:
 "Pet has no tasks list — Task.linked_pet links a task to a pet, but you can't go the other direction (pet.tasks). The UML's Pet "1" *-- "many" Task implies both directions should be navigable."
 I replied to it by asking: 
@@ -111,6 +113,8 @@ I implemented generate_recurring_tasks() with the help of Claude.
 - Why is that tradeoff reasonable for this scenario?
 
 ---
+One tradeoff my scheduler makes is sort_by_time sorts by the time of day only. It ignores the date/day. 
+This means a task due tomorrow at 8am sorts before one due today at 8pm. This tradeoff is reasonable for the scenario because I am assuming the owner/user is only looking at tasks of the day and not tasks of the next day. I hope to keep my methods as simple as I can, without adding more complexity so I am assuming the tradeoff is reasonable for now. 
 
 ## 3. AI Collaboration
 

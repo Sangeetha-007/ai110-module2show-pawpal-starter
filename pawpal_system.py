@@ -101,6 +101,42 @@ class Scheduler:
         if task.is_recurring:
             self.generate_recurring_tasks()
 
+    def mark_task_complete(self, task: Task):
+        """Mark a task complete and auto-schedule the next occurrence for recurring tasks.
+
+        Calls task.mark_complete() to set is_completed = True, then checks
+        recurrence_pattern. For 'daily' tasks, the next due date is due_date + 1 day;
+        for 'weekly' tasks, due_date + 7 days. A duplicate check (matching title and
+        due_date) prevents the same occurrence from being added twice. Non-recurring
+        tasks are marked complete with no further action.
+
+        Args:
+            task: The Task to mark as complete.
+        """
+        task.mark_complete()
+        if not task.is_recurring:
+            return
+        if task.recurrence_pattern == "daily":
+            next_due = task.due_date + timedelta(days=1)
+        elif task.recurrence_pattern == "weekly":
+            next_due = task.due_date + timedelta(weeks=1)
+        else:
+            return
+        already_exists = any(
+            t.title == task.title and t.due_date == next_due
+            for t in self.all_tasks
+        )
+        if not already_exists:
+            self.all_tasks.append(Task(
+                title=task.title,
+                description=task.description,
+                due_date=next_due,
+                linked_pet=task.linked_pet,
+                is_recurring=task.is_recurring,
+                recurrence_pattern=task.recurrence_pattern,
+                duration_minutes=task.duration_minutes,
+            ))
+
     # removes a task only if it exists in the list
     def remove_task(self, task: Task):
         """Remove a task from the scheduler if it exists."""
@@ -137,6 +173,85 @@ class Scheduler:
                 if task_a.due_date < b_end and a_end > task_b.due_date:
                     conflicts.append(Conflict(task_a, task_b))
         return conflicts
+
+    def warn_conflicts(self) -> List[str]:
+        """Return warning messages for tasks scheduled at the same time or with overlapping windows.
+
+        Iterates over every unique pair of tasks (O(n²)) and checks two conditions:
+          - Same time: both tasks share an identical due_date.
+          - Overlapping window: task A starts before task B ends AND task A ends
+            after task B starts, calculated using due_date + duration_minutes.
+        Same-time is checked first; overlapping is only reported if the times differ
+        but the windows still intersect. Returns human-readable strings rather than
+        raising exceptions, so callers can log or display warnings without crashing.
+
+        Returns:
+            A list of warning strings; empty if no conflicts are found.
+        """
+        warnings = []
+        for i, task_a in enumerate(self.all_tasks):
+            for task_b in self.all_tasks[i + 1:]:
+                same_time = task_a.due_date == task_b.due_date
+                a_end = task_a.due_date + timedelta(minutes=task_a.duration_minutes)
+                b_end = task_b.due_date + timedelta(minutes=task_b.duration_minutes)
+                overlapping = task_a.due_date < b_end and a_end > task_b.due_date
+                if same_time:
+                    warnings.append(
+                        f"WARNING: '{task_a.title}' and '{task_b.title}' are both scheduled at "
+                        f"{task_a.due_date.strftime('%I:%M %p')} on {task_a.due_date.strftime('%Y-%m-%d')}."
+                    )
+                elif overlapping:
+                    warnings.append(
+                        f"WARNING: '{task_a.title}' ({task_a.due_date.strftime('%I:%M %p')}–{a_end.strftime('%I:%M %p')}) "
+                        f"overlaps with '{task_b.title}' ({task_b.due_date.strftime('%I:%M %p')}–{b_end.strftime('%I:%M %p')})."
+                    )
+        return warnings
+
+
+
+    #     How it works:
+    #   - Starts with the full all_tasks list
+    #   - If completed is provided (True/False), filters by task.is_completed
+    #   - If pet_name is provided, filters by task.linked_pet.name (guards against None linked pets)
+    #   - Both filters stack — each narrows the previous result
+    def filter_tasks(self, completed: Optional[bool] = None, pet_name: Optional[str] = None) -> List[Task]:
+        """Return tasks filtered by completion status and/or pet name.
+
+        Filters are applied sequentially and stack — each narrows the previous result.
+        Omitting a parameter skips that filter entirely, so calling filter_tasks() with
+        no arguments returns all tasks. Tasks with no linked_pet (linked_pet is None)
+        are excluded when pet_name is provided.
+
+        Args:
+            completed: If True, return only completed tasks. If False, return only
+                incomplete tasks. If None (default), completion status is not filtered.
+            pet_name: If provided, return only tasks whose linked_pet.name matches
+                this string (case-sensitive). If None (default), all pets are included.
+
+        Returns:
+            A filtered list of Task objects; empty list if no tasks match.
+        """
+        results = self.all_tasks
+        if completed is not None:
+            results = [t for t in results if t.is_completed == completed]
+        if pet_name is not None:
+            results = [t for t in results if t.linked_pet is not None and t.linked_pet.name == pet_name]
+        return results
+
+    def sort_by_time(self) -> List[Task]:
+        """Return all tasks sorted by their time of day in HH:MM format.
+
+        Extracts the time portion of each task's due_date as a zero-padded "HH:MM"
+        string using strftime, then sorts lexicographically. This works correctly
+        because zero-padded 24-hour strings have the same order as numeric time
+        (e.g. "08:00" < "09:30" < "14:00" < "23:59"). Note: only time-of-day is
+        considered — date is ignored, so tasks on different days may interleave.
+        The original all_tasks list is not modified.
+
+        Returns:
+            A new list of all Task objects ordered from earliest to latest time of day.
+        """
+        return sorted(self.all_tasks, key=lambda t: t.due_date.strftime("%H:%M"))
 
     def generate_recurring_tasks(self):
         """Spawn the next occurrence of any overdue recurring tasks."""

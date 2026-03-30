@@ -41,3 +41,10 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+### Smarter Scheduling
+
+1. mark_task_complete
+2. warn_conflicts  
+3. filter_tasks
+4. sort_by_time
