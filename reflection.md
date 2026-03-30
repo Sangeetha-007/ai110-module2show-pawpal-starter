@@ -156,6 +156,7 @@ So, I wanted to keep it simple as possible. The edge cases I wanted to test for 
 - What edge cases would you test next if you had more time?
 
 ---
+I am not so confident that my scheduler works correctly. The streamlit app doesnt let me add any pets on my own. However, I see the instances I have created on main.py. An edge case I would test, is to add tasks for another day. 
 
 ## 5. Reflection
 
@@ -163,10 +164,19 @@ So, I wanted to keep it simple as possible. The edge cases I wanted to test for 
 
 - What part of this project are you most satisfied with?
 
+The part of the project I am satsified with is how the test cases that were created in test_pawpal.py all passed. 
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+If I had another iteration, I would create "Add Pet" or "Add Task" buttons, so we can add them ourselves, rather than just experiment with the instances.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+One thing I learned about working with AI on this project, is to not accept everything it suggests. I denied a lot of code suggestions because it just felt too complicated. One AI suggestion I rejected was how I asked it to generate a new final UML diagram, and Claude wanted to use matplotlib to generate code that creates the diagram. Using separate chat sessions did help me stay organized because if I needed to go back and check something, I knew exactly where to look. 
+
+
+
