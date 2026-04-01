@@ -44,10 +44,10 @@ pip install -r requirements.txt
 
 ### Smarter Scheduling
 
-1. mark_task_complete
-2. warn_conflicts  
-3. filter_tasks
-4. sort_by_time
+1. mark_task_complete: Marks a task complete and auto-schedule the next occurrence for recurring tasks.
+2. warn_conflicts: Returns warning messages for tasks scheduled at the same time or with overlapping windows.  
+3. filter_tasks: Returns tasks filtered by completion status and/or pet name.
+4. sort_by_time: Returns all tasks sorted by their time of day in HH:MM format.
 
 ### Testing PawPal+
 
